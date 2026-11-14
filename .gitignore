@@ -1,0 +1,8 @@
+*.DBF 
+*.dbf 
+*.dmp 
+*.DMP 
+*.log 
+.vs/ 
+bin/ 
+obj/ 

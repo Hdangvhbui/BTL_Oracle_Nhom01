@@ -1,0 +1,43 @@
+ALTER TABLESPACE TBS_FASHION_LAB 
+ADD DATAFILE 'D:\oracle_btl\FASHION_LAB02.DBF' 
+SIZE 15M AUTOEXTEND OFF;
+
+-- 2.1 Bật tự động mở rộng dung lượng cho datafile 2
+ALTER DATABASE DATAFILE 'D:\oracle_btl\FASHION_LAB02.DBF' 
+AUTOEXTEND ON NEXT 5M MAXSIZE 50M;
+
+-- 2.2 Tắt tự động mở rộng
+ALTER DATABASE DATAFILE 'D:\oracle_btl\FASHION_LAB02.DBF' 
+AUTOEXTEND OFF;
+
+-- 3. Thay đổi kích thước datafile lên 25MB
+ALTER DATABASE DATAFILE 'D:\oracle_btl\FASHION_LAB02.DBF' 
+RESIZE 25M;
+
+-- 4.1 Tạo bảng test và chèn 2 dòng dữ liệu
+ALTER USER FASHION_ADMIN QUOTA UNLIMITED ON TBS_FASHION_LAB;
+CREATE TABLE FASHION_ADMIN.TEST_MOVE (
+    ID NUMBER PRIMARY KEY,
+    NOTE VARCHAR2(50)
+) TABLESPACE TBS_FASHION_LAB;
+
+INSERT INTO FASHION_ADMIN.TEST_MOVE VALUES (1, 'Kiem tra di chuyen file');
+INSERT INTO FASHION_ADMIN.TEST_MOVE VALUES (2, 'Du lieu an toan');
+COMMIT;
+
+-- 4.2 Đưa tablespace offline
+ALTER TABLESPACE TBS_FASHION_LAB OFFLINE;
+
+-- 4.3 Cập nhật tên file mới trong metadata Oracle
+ALTER TABLESPACE TBS_FASHION_LAB 
+RENAME DATAFILE 'D:\oracle_btl\FASHION_LAB02.DBF' 
+TO 'D:\oracle_btl\FASHION_LAB02_MOVED.DBF';
+
+-- 4.4 Đưa tablespace online trở lại
+ALTER TABLESPACE TBS_FASHION_LAB ONLINE;
+
+-- 4.5 Kiểm tra dữ liệu bảng TEST_MOVE vẫn còn nguyên vẹn
+SELECT * FROM FASHION_ADMIN.TEST_MOVE;
+
+-- 5. Thực nghiệm xóa Tablespace thử nghiệm và xóa sạch datafile vật lý
+DROP TABLESPACE TBS_FASHION_LAB INCLUDING CONTENTS AND DATAFILES;
