@@ -117,3 +117,13 @@ LEFT JOIN (
 ) ban ON sp.MASP = ban.MASP
 GROUP BY sp.MASP, sp.TENSP, sp.SOLUONGTON, ban.TONG_BAN
 ORDER BY sp.MASP;
+
+
+
+
+
+
+
+
+
+
