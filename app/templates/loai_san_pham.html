@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Quản lý Loại sản phẩm – Oracle 19c{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>{% if loai_dang_sua %}Cập nhật loại sản phẩm: {{ loai_dang_sua[0] }}{% else %}Thêm loại sản phẩm mới{% endif %}</h2>
+    <form method="POST" action="{% if loai_dang_sua %}{{ url_for('sua_loai', maloai=loai_dang_sua[0]) }}{% else %}{{ url_for('them_loai') }}{% endif %}">
+        <div class="form-grid">
+            <div>
+                <label>Mã loại sản phẩm *</label>
+                <input type="text" name="maloai" required maxlength="20"
+                       value="{{ loai_dang_sua[0] if loai_dang_sua else '' }}"
+                       {% if loai_dang_sua %}readonly{% endif %}
+                       placeholder="VD: L01">
+            </div>
+            <div>
+                <label>Tên loại sản phẩm *</label>
+                <input type="text" name="tenloai" required maxlength="100"
+                       value="{{ loai_dang_sua[1] if loai_dang_sua else '' }}"
+                       placeholder="VD: Áo thun nam/nữ">
+            </div>
+            <div>
+                <label>Mô tả</label>
+                <input type="text" name="mota" maxlength="255"
+                       value="{{ loai_dang_sua[2] if loai_dang_sua and loai_dang_sua[2] else '' }}"
+                       placeholder="Mô tả ngắn về nhóm hàng...">
+            </div>
+        </div>
+        <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+                {% if loai_dang_sua %}Lưu thay đổi{% else %}+ Thêm loại sản phẩm{% endif %}
+            </button>
+            {% if loai_dang_sua %}
+                <a href="{{ url_for('danh_sach_loai') }}" class="btn btn-secondary">Hủy sửa</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Danh sách Loại sản phẩm ({{ ds_loai|length }} loại)</h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 120px;">Mã loại</th>
+                <th style="width: 240px;">Tên loại</th>
+                <th>Mô tả</th>
+                <th style="width: 115px;" class="center">Số SKU</th>
+                <th style="width: 135px;" class="center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in ds_loai %}
+            <tr>
+                <td><strong>{{ row[0] }}</strong></td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] or '—' }}</td>
+                <td class="center">{{ row[3] }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('danh_sach_loai', edit=row[0]) }}" class="btn btn-warning">Sửa</a>
+                    <form method="POST" action="{{ url_for('xoa_loai', maloai=row[0]) }}"
+                          onsubmit="return confirm('Xác nhận xóa loại sản phẩm {{ row[0] }}?');">
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="center">Chưa có dữ liệu loại sản phẩm trong bảng FASHION_ADMIN.LOAISANPHAM.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
