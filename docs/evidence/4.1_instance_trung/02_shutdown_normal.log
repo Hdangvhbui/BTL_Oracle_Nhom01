@@ -1,0 +1,21 @@
+SQL> SHUTDOWN NORMAL
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> STARTUP
+ORACLE instance started.
+
+Total System Global Area 5066718176 bytes                                       
+Fixed Size                  9038816 bytes                                       
+Variable Size             939524096 bytes                                       
+Database Buffers         4110417920 bytes                                       
+Redo Buffers                7737344 bytes                                       
+Database mounted.
+Database opened.
+SQL> SELECT INSTANCE_NAME, STATUS FROM V$INSTANCE;
+
+INSTANCE_NAME    STATUS                                                         
+---------------- ------------                                                   
+orcl             OPEN                                                           
+
+SQL> SPOOL OFF
