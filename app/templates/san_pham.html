@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Quản lý Sản phẩm (SKU) – Oracle 19c{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>{% if sp_dang_sua %}Cập nhật sản phẩm SKU: {{ sp_dang_sua[0] }}{% else %}Thêm sản phẩm (SKU) mới{% endif %}</h2>
+    <form method="POST" action="{% if sp_dang_sua %}{{ url_for('sua_san_pham', masp=sp_dang_sua[0]) }}{% else %}{{ url_for('them_san_pham') }}{% endif %}">
+        <div class="form-grid">
+            <div>
+                <label>Mã sản phẩm (SKU) *</label>
+                <input type="text" name="masp" required maxlength="20"
+                       value="{{ sp_dang_sua[0] if sp_dang_sua else '' }}"
+                       {% if sp_dang_sua %}readonly{% endif %}
+                       placeholder="VD: SP01">
+            </div>
+            <div>
+                <label>Tên sản phẩm *</label>
+                <input type="text" name="tensp" required maxlength="150"
+                       value="{{ sp_dang_sua[1] if sp_dang_sua else '' }}"
+                       placeholder="VD: Áo thun Cotton Basic">
+            </div>
+            <div>
+                <label>Loại sản phẩm *</label>
+                <select name="maloai" required>
+                    <option value="">-- Chọn loại sản phẩm --</option>
+                    {% for loai in ds_loai %}
+                        <option value="{{ loai[0] }}"
+                            {% if sp_dang_sua and sp_dang_sua[7] == loai[0] %}selected{% endif %}>
+                            {{ loai[0] }} - {{ loai[1] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label>Kích cỡ *</label>
+                <select name="kichco" required>
+                    {% for sz in ['S', 'M', 'L', 'XL', 'XXL'] %}
+                        <option value="{{ sz }}"
+                            {% if sp_dang_sua and sp_dang_sua[2] == sz %}selected{% endif %}>
+                            {{ sz }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label>Màu sắc *</label>
+                <input type="text" name="mausac" required maxlength="50"
+                       value="{{ sp_dang_sua[3] if sp_dang_sua else '' }}"
+                       placeholder="VD: Đen, Trắng...">
+            </div>
+            <div>
+                <label>Chất liệu *</label>
+                <input type="text" name="chatlieu" required maxlength="100"
+                       value="{{ sp_dang_sua[4] if sp_dang_sua else '' }}"
+                       placeholder="VD: Cotton 100%, Kaki...">
+            </div>
+            <div>
+                <label>Giá bán (VNĐ) *</label>
+                <input type="number" name="giaban" min="1" required
+                       value="{{ sp_dang_sua[5] if sp_dang_sua else '' }}"
+                       placeholder="VD: 250000">
+            </div>
+            <div>
+                <label>Số lượng tồn *</label>
+                <input type="number" name="soluongton" min="0" required
+                       value="{{ sp_dang_sua[6] if sp_dang_sua else 0 }}">
+            </div>
+        </div>
+        <div class="btn-group">
+            <button type="submit" class="btn btn-primary">
+                {% if sp_dang_sua %}Lưu thay đổi{% else %}+ Thêm sản phẩm SKU{% endif %}
+            </button>
+            {% if sp_dang_sua %}
+                <a href="{{ url_for('danh_sach_san_pham') }}" class="btn btn-secondary">Hủy sửa</a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Danh sách Sản phẩm thời trang – SKU ({{ ds_sp|length }} mặt hàng)</h2>
+
+    <form method="GET" action="{{ url_for('danh_sach_san_pham') }}" class="filter-bar">
+        <input type="text" name="q" value="{{ tu_khoa }}" placeholder="Tìm theo mã SP hoặc tên sản phẩm...">
+        <select name="maloai">
+            <option value="">-- Tất cả loại sản phẩm --</option>
+            {% for loai in ds_loai %}
+                <option value="{{ loai[0] }}" {% if loc_loai == loai[0] %}selected{% endif %}>
+                    {{ loai[0] }} - {{ loai[1] }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Lọc</button>
+        {% if tu_khoa or loc_loai %}
+            <a href="{{ url_for('danh_sach_san_pham') }}" class="btn btn-secondary">Đặt lại</a>
+        {% endif %}
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 90px;">Mã SP</th>
+                <th>Tên sản phẩm</th>
+                <th style="width: 150px;">Loại SP</th>
+                <th style="width: 65px;" class="center">Size</th>
+                <th style="width: 100px;">Màu sắc</th>
+                <th style="width: 120px;">Chất liệu</th>
+                <th style="width: 115px;" class="num">Giá bán</th>
+                <th style="width: 80px;" class="num">Tồn kho</th>
+                <th style="width: 130px;" class="center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in ds_sp %}
+            <tr>
+                <td><strong>{{ row[0] }}</strong></td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[8] }}</td>
+                <td class="center"><span class="badge-size">{{ row[2] }}</span></td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+                <td class="num">{{ "{:,.0f}".format(row[5]) }} đ</td>
+                <td class="num">{{ row[6] }}</td>
+                <td class="actions">
+                    <a href="{{ url_for('danh_sach_san_pham', edit=row[0]) }}" class="btn btn-warning">Sửa</a>
+                    <form method="POST" action="{{ url_for('xoa_san_pham', masp=row[0]) }}"
+                          onsubmit="return confirm('Xác nhận xóa sản phẩm {{ row[0] }}?');">
+                        <button type="submit" class="btn btn-danger">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" class="center">Chưa có sản phẩm phù hợp trong bảng FASHION_ADMIN.SANPHAM.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

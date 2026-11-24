@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Quản lý Cửa hàng Thời trang - Oracle 19c{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            background: #f3f5f8;
+            color: #222;
+        }
+        .navbar {
+            background: #1F4E79;
+            padding: 14px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .brand {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .navbar a {
+            color: #dce9f5;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 7px 13px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+        .navbar a:hover, .navbar a.active {
+            background: #2E75B6;
+            color: #fff;
+        }
+        .conn-badge {
+            background: rgba(255,255,255,0.14);
+            color: #e9f2fa;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+        }
+        .container {
+            max-width: 1180px;
+            margin: 22px auto;
+            padding: 0 18px;
+        }
+        .card {
+            background: #fff;
+            border: 1px solid #d7dfe8;
+            border-radius: 6px;
+            padding: 20px 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        h2 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: #1F4E79;
+            border-bottom: 2px solid #e6edf5;
+            padding-bottom: 8px;
+        }
+        .alert {
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+        .alert-success {
+            background: #e7f5ec;
+            color: #146c32;
+            border: 1px solid #b5dfc2;
+        }
+        .alert-error {
+            background: #fdecec;
+            color: #C00000;
+            border: 1px solid #f5b7b1;
+            font-weight: 500;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 13px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #c5cfd9;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #fff;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2E75B6;
+        }
+        input[readonly] {
+            background: #eef2f6;
+            color: #555;
+        }
+        .btn-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13.5px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary { background: #1F4E79; color: #fff; }
+        .btn-primary:hover { background: #2E75B6; }
+        .btn-warning { background: #d98200; color: #fff; padding: 5px 10px; font-size: 12.5px; }
+        .btn-danger { background: #C00000; color: #fff; padding: 5px 10px; font-size: 12.5px; }
+        .btn-secondary { background: #64748b; color: #fff; }
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+            align-items: center;
+        }
+        .filter-bar input { max-width: 280px; }
+        .filter-bar select { max-width: 240px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+        th, td {
+            border: 1px solid #d7dfe8;
+            padding: 9px 10px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        th {
+            background: #1F4E79;
+            color: #fff;
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background: #f8fafc; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; }
+        .center { text-align: center; }
+        .badge-size {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #e6eff8;
+            color: #1F4E79;
+            border-radius: 3px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .actions {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+        .actions form { margin: 0; }
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 12.5px;
+            margin: 24px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-left">
+            <span class="brand">NHÓM 01 – QUẢN LÝ CỬA HÀNG THỜI TRANG</span>
+            <a href="{{ url_for('danh_sach_san_pham') }}" class="{% if request.path.startswith('/san-pham') %}active{% endif %}">Sản phẩm (SKU)</a>
+            <a href="{{ url_for('danh_sach_loai') }}" class="{% if request.path.startswith('/loai-san-pham') %}active{% endif %}">Loại sản phẩm</a>
+        </div>
+        {% if db_info %}
+            <span class="conn-badge">Oracle: {{ db_info }}</span>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        {% if db_error %}
+            <div class="alert alert-error">{{ db_error }}</div>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="alert alert-{{ category }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        Bài tập lớn Quản trị CSDL Oracle 19c – Khoa CNTT, Trường ĐH Giao thông Vận tải
+    </footer>
+</body>
+</html>
