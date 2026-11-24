@@ -1,0 +1,81 @@
+SQL> SHUTDOWN IMMEDIATE
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> STARTUP MOUNT
+ORACLE instance started.
+
+Total System Global Area 5066718176 bytes                                       
+Fixed Size                  9038816 bytes                                       
+Variable Size             939524096 bytes                                       
+Database Buffers         4110417920 bytes                                       
+Redo Buffers                7737344 bytes                                       
+Database mounted.
+SQL> ALTER DATABASE OPEN READ ONLY;
+
+Database altered.
+
+SQL> SELECT NAME, OPEN_MODE FROM V$DATABASE;
+
+NAME      OPEN_MODE                                                             
+--------- --------------------                                                  
+ORCL      READ ONLY                                                             
+
+SQL> SELECT ID, GHICHU
+  2  FROM FASHION_ADMIN.LAB_INSTANCE_TRUNG
+  3  WHERE ID = 1;
+
+        ID GHICHU                                                               
+---------- ---------------------------------------------                        
+         1 Dang thu SHUTDOWN TRANSACTIONAL                                      
+
+SQL> INSERT INTO FASHION_ADMIN.LAB_INSTANCE_TRUNG (ID, GHICHU)
+  2  VALUES (2, 'Thu INSERT khi READ ONLY');
+INSERT INTO FASHION_ADMIN.LAB_INSTANCE_TRUNG (ID, GHICHU)
+                          *
+ERROR at line 1:
+ORA-16000: database or pluggable database open for read-only access 
+
+
+SQL> SHUTDOWN IMMEDIATE
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> STARTUP MOUNT
+ORACLE instance started.
+
+Total System Global Area 5066718176 bytes                                       
+Fixed Size                  9038816 bytes                                       
+Variable Size             939524096 bytes                                       
+Database Buffers         4110417920 bytes                                       
+Redo Buffers                7737344 bytes                                       
+Database mounted.
+SQL> ALTER DATABASE OPEN READ WRITE;
+
+Database altered.
+
+SQL> SELECT NAME, OPEN_MODE FROM V$DATABASE;
+
+NAME      OPEN_MODE                                                             
+--------- --------------------                                                  
+ORCL      READ WRITE                                                            
+
+SQL> SET AUTOCOMMIT OFF
+SQL> INSERT INTO FASHION_ADMIN.LAB_INSTANCE_TRUNG (ID, GHICHU)
+  2  VALUES (2, 'Thu INSERT khi READ WRITE');
+
+1 row created.
+
+SQL> SELECT ID, GHICHU
+  2  FROM FASHION_ADMIN.LAB_INSTANCE_TRUNG
+  3  WHERE ID = 2;
+
+        ID GHICHU                                                               
+---------- ---------------------------------------------                        
+         2 Thu INSERT khi READ WRITE                                            
+
+SQL> ROLLBACK;
+
+Rollback complete.
+
+SQL> SPOOL OFF

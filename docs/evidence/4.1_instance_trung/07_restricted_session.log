@@ -1,0 +1,31 @@
+SQL> ALTER SYSTEM ENABLE RESTRICTED SESSION;
+
+System altered.
+
+SQL> SELECT INSTANCE_NAME, LOGINS FROM V$INSTANCE;
+
+INSTANCE_NAME    LOGINS                                                         
+---------------- ----------                                                     
+orcl             RESTRICTED                                                     
+
+SQL> ALTER SYSTEM ENABLE RESTRICTED SESSION;
+
+System altered.
+
+SQL> SELECT INSTANCE_NAME, LOGINS FROM V$INSTANCE;
+
+INSTANCE_NAME    LOGINS                                                         
+---------------- ----------                                                     
+orcl             RESTRICTED                                                     
+
+SQL> ALTER SYSTEM DISABLE RESTRICTED SESSION;
+
+System altered.
+
+SQL> SELECT INSTANCE_NAME, STATUS, LOGINS FROM V$INSTANCE;
+
+INSTANCE_NAME    STATUS       LOGINS                                            
+---------------- ------------ ----------                                        
+orcl             OPEN         ALLOWED                                           
+
+SQL> SPOOL OFF

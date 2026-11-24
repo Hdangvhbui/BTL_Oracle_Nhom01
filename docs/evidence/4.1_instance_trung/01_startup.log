@@ -1,0 +1,49 @@
+SQL> SHUTDOWN IMMEDIATE
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> STARTUP NOMOUNT
+ORACLE instance started.
+
+Total System Global Area 5066718176 bytes                                       
+Fixed Size                  9038816 bytes                                       
+Variable Size             939524096 bytes                                       
+Database Buffers         4110417920 bytes                                       
+Redo Buffers                7737344 bytes                                       
+SQL> SELECT INSTANCE_NAME, STATUS
+  2  FROM V$INSTANCE;
+
+INSTANCE_NAME    STATUS                                                         
+---------------- ------------                                                   
+orcl             STARTED                                                        
+
+SQL> ALTER DATABASE MOUNT;
+
+Database altered.
+
+SQL> SELECT INSTANCE_NAME, STATUS
+  2  FROM V$INSTANCE;
+
+INSTANCE_NAME    STATUS                                                         
+---------------- ------------                                                   
+orcl             MOUNTED                                                        
+
+SQL> ALTER DATABASE OPEN;
+
+Database altered.
+
+SQL> SELECT INSTANCE_NAME, STATUS
+  2  FROM V$INSTANCE;
+
+INSTANCE_NAME    STATUS                                                         
+---------------- ------------                                                   
+orcl             OPEN                                                           
+
+SQL> SELECT NAME, OPEN_MODE
+  2  FROM V$DATABASE;
+
+NAME      OPEN_MODE                                                             
+--------- --------------------                                                  
+ORCL      READ WRITE                                                            
+
+SQL> SPOOL OFF
