@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Quản lý Loại sản phẩm – Oracle 19c{% endblock %}
+{% block heading %}Loại sản phẩm{% endblock %}
 
 {% block content %}
+<p class="page-intro">Sắp xếp danh mục sản phẩm và theo dõi số SKU thuộc từng loại.</p>
 <div class="card">
     <h2>{% if loai_dang_sua %}Cập nhật loại sản phẩm: {{ loai_dang_sua[0] }}{% else %}Thêm loại sản phẩm mới{% endif %}</h2>
     <form method="POST" action="{% if loai_dang_sua %}{{ url_for('sua_loai', maloai=loai_dang_sua[0]) }}{% else %}{{ url_for('them_loai') }}{% endif %}">
@@ -39,7 +41,7 @@
 
 <div class="card">
     <h2>Danh sách Loại sản phẩm ({{ ds_loai|length }} loại)</h2>
-    <table>
+    <div class="table-scroll"><table>
         <thead>
             <tr>
                 <th style="width: 120px;">Mã loại</th>
@@ -57,10 +59,10 @@
                 <td>{{ row[2] or '—' }}</td>
                 <td class="center">{{ row[3] }}</td>
                 <td class="actions">
-                    <a href="{{ url_for('danh_sach_loai', edit=row[0]) }}" class="btn btn-warning">Sửa</a>
+                    <a href="{{ url_for('danh_sach_loai', edit=row[0]) }}" class="btn btn-warning btn-sm">Sửa</a>
                     <form method="POST" action="{{ url_for('xoa_loai', maloai=row[0]) }}"
                           onsubmit="return confirm('Xác nhận xóa loại sản phẩm {{ row[0] }}?');">
-                        <button type="submit" class="btn btn-danger">Xóa</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
                     </form>
                 </td>
             </tr>
@@ -70,6 +72,6 @@
             </tr>
             {% endfor %}
         </tbody>
-    </table>
+    </table></div>
 </div>
 {% endblock %}

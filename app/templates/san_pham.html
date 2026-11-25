@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}Quản lý Sản phẩm (SKU) – Oracle 19c{% endblock %}
+{% block heading %}Sản phẩm{% endblock %}
 
 {% block content %}
+<p class="page-intro">Quản lý từng SKU theo kích cỡ, màu sắc và số lượng tồn kho.</p>
 <div class="card">
     <h2>{% if sp_dang_sua %}Cập nhật sản phẩm SKU: {{ sp_dang_sua[0] }}{% else %}Thêm sản phẩm (SKU) mới{% endif %}</h2>
     <form method="POST" action="{% if sp_dang_sua %}{{ url_for('sua_san_pham', masp=sp_dang_sua[0]) }}{% else %}{{ url_for('them_san_pham') }}{% endif %}">
@@ -81,22 +83,22 @@
     <h2>Danh sách Sản phẩm thời trang – SKU ({{ ds_sp|length }} mặt hàng)</h2>
 
     <form method="GET" action="{{ url_for('danh_sach_san_pham') }}" class="filter-bar">
-        <input type="text" name="q" value="{{ tu_khoa }}" placeholder="Tìm theo mã SP hoặc tên sản phẩm...">
-        <select name="maloai">
+        <div class="filter-field"><label for="q">Tìm kiếm</label><input id="q" type="text" name="q" value="{{ tu_khoa }}" placeholder="Mã hoặc tên sản phẩm..."></div>
+        <div class="filter-field"><label for="loc-maloai">Loại sản phẩm</label><select id="loc-maloai" name="maloai">
             <option value="">-- Tất cả loại sản phẩm --</option>
             {% for loai in ds_loai %}
                 <option value="{{ loai[0] }}" {% if loc_loai == loai[0] %}selected{% endif %}>
                     {{ loai[0] }} - {{ loai[1] }}
                 </option>
             {% endfor %}
-        </select>
+        </select></div>
         <button type="submit" class="btn btn-primary">Lọc</button>
         {% if tu_khoa or loc_loai %}
             <a href="{{ url_for('danh_sach_san_pham') }}" class="btn btn-secondary">Đặt lại</a>
         {% endif %}
     </form>
 
-    <table>
+    <div class="table-scroll"><table>
         <thead>
             <tr>
                 <th style="width: 90px;">Mã SP</th>
@@ -120,12 +122,12 @@
                 <td>{{ row[3] }}</td>
                 <td>{{ row[4] }}</td>
                 <td class="num">{{ "{:,.0f}".format(row[5]) }} đ</td>
-                <td class="num">{{ row[6] }}</td>
+                <td class="num">{% if row[6] == 0 %}<span class="stock-badge out">Hết hàng · 0</span>{% elif row[6] <= 5 %}<span class="stock-badge low">Sắp hết · {{ row[6] }}</span>{% else %}<span class="stock-badge ok">Còn hàng · {{ row[6] }}</span>{% endif %}</td>
                 <td class="actions">
-                    <a href="{{ url_for('danh_sach_san_pham', edit=row[0]) }}" class="btn btn-warning">Sửa</a>
+                    <a href="{{ url_for('danh_sach_san_pham', edit=row[0]) }}" class="btn btn-warning btn-sm">Sửa</a>
                     <form method="POST" action="{{ url_for('xoa_san_pham', masp=row[0]) }}"
                           onsubmit="return confirm('Xác nhận xóa sản phẩm {{ row[0] }}?');">
-                        <button type="submit" class="btn btn-danger">Xóa</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
                     </form>
                 </td>
             </tr>
@@ -135,6 +137,6 @@
             </tr>
             {% endfor %}
         </tbody>
-    </table>
+    </table></div>
 </div>
 {% endblock %}

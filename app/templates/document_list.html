@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% set sale = kind == 'sale' %}
+{% block title %}{{ 'Hóa đơn' if sale else 'Phiếu nhập' }} · Fashion Store{% endblock %}
+{% block heading %}{{ 'Hóa đơn bán hàng' if sale else 'Phiếu nhập hàng' }}{% endblock %}
+{% block content %}
+<p class="page-intro">Danh sách chứng từ đã lập và tổng tiền tính từ các dòng chi tiết.</p>
+<section class="card">
+    <div class="section-head"><h2>Chứng từ ({{ documents|length }})</h2><a class="btn btn-primary" href="{{ url_for('workflows.form_hoa_don' if sale else 'workflows.form_phieu_nhap') }}">+ Lập {{ 'hóa đơn' if sale else 'phiếu nhập' }}</a></div>
+    {% if documents %}<div class="table-scroll"><table><thead><tr><th>Mã</th><th>Ngày</th><th>Nhân viên</th><th>{{ 'Khách hàng' if sale else 'Nhà cung cấp' }}</th><th class="num">Tổng tiền</th><th>Chi tiết</th></tr></thead><tbody>
+    {% for d in documents %}<tr><td><strong>{{ d.mahd if sale else d.mapn }}</strong></td><td>{{ (d.ngaylap if sale else d.ngaynhap).strftime('%d/%m/%Y %H:%M') }}</td><td>{{ d.nhanvien }} ({{ d.manv }})</td><td>{{ d.khachhang if sale else d.nhacungcap }}</td><td class="num">{{ '{:,.0f}'.format(d.tongtien) }} đ</td><td><a class="btn btn-warning btn-sm" href="{{ url_for('workflows.chi_tiet_hoa_don', mahd=d.mahd) if sale else url_for('workflows.chi_tiet_phieu_nhap', mapn=d.mapn) }}">Xem</a></td></tr>{% endfor %}
+    </tbody></table></div>{% else %}<div class="empty-state">Chưa có chứng từ.</div>{% endif %}
+</section>
+{% endblock %}

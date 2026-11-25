@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Tổng quan kho · Fashion Store{% endblock %}
+{% block heading %}Tổng quan kho{% endblock %}
+{% block content %}
+<p class="page-intro">Theo dõi tình trạng tồn kho theo từng SKU. Số liệu và danh sách bên dưới cùng áp dụng bộ lọc hiện tại.</p>
+<section class="stats-grid" aria-label="Số liệu tồn kho">
+    <div class="stat-card glass"><span class="stat-label">Tổng SKU</span><strong class="stat-value">{{ so_lieu.tong_sku }}</strong><span class="stat-foot">Trong loại sản phẩm đang chọn</span></div>
+    <div class="stat-card glass out"><span class="stat-label">Hết hàng</span><strong class="stat-value">{{ so_lieu.het_hang }}</strong><span class="stat-foot">Tồn kho bằng 0</span></div>
+    <div class="stat-card glass low"><span class="stat-label">Sắp hết</span><strong class="stat-value">{{ so_lieu.sap_het }}</strong><span class="stat-foot">Từ 1 đến {{ nguong }} sản phẩm</span></div>
+</section>
+<section class="card">
+    <h2>Bộ lọc kho</h2>
+    <form method="GET" action="{{ url_for('tong_quan_kho') }}" class="filter-bar">
+        <div class="filter-field"><label for="maloai">Loại sản phẩm</label><select id="maloai" name="maloai"><option value="">Tất cả loại sản phẩm</option>{% for loai in ds_loai %}<option value="{{ loai[0] }}" {% if maloai == loai[0] %}selected{% endif %}>{{ loai[0] }} · {{ loai[1] }}</option>{% endfor %}</select></div>
+        <div class="filter-field small"><label for="nguong">Ngưỡng sắp hết</label><input id="nguong" type="number" name="nguong" min="1" step="1" required value="{{ nguong }}"></div>
+        <button type="submit" class="btn btn-primary">Áp dụng bộ lọc</button>
+        <a href="{{ url_for('tong_quan_kho') }}" class="btn btn-secondary">Đặt lại</a>
+    </form>
+</section>
+<section class="card">
+    <h2>SKU sắp hết <span class="stock-badge low">{{ so_lieu.sap_het }} SKU</span></h2>
+    <p class="card-subtitle">Danh sách có tồn kho từ 1 đến {{ nguong }}, sắp xếp theo số lượng tồn tăng dần.</p>
+    {% if ds_sap_het %}
+    <div class="table-scroll"><table><thead><tr><th>Mã SKU</th><th>Tên sản phẩm</th><th>Size</th><th>Màu</th><th>Loại sản phẩm</th><th class="num">Tồn kho</th><th>Thao tác</th></tr></thead><tbody>
+        {% for row in ds_sap_het %}<tr><td><strong>{{ row.masp }}</strong></td><td>{{ row.tensp }}</td><td><span class="badge-size">{{ row.kichco }}</span></td><td>{{ row.mausac }}</td><td>{{ row.tenloai }}</td><td class="num"><span class="stock-badge low">Sắp hết · {{ row.soluongton }}</span></td><td><a class="btn btn-warning btn-sm" href="{{ url_for('danh_sach_san_pham', edit=row.masp) }}">Xem / Sửa</a></td></tr>{% endfor %}
+    </tbody></table></div>
+    {% else %}<div class="empty-state">Không có SKU sắp hết phù hợp với bộ lọc này.</div>{% endif %}
+</section>
+{% endblock %}
