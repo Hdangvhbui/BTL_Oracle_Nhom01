@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+import re
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import oracledb
 
 app = Flask(__name__)
@@ -20,6 +21,94 @@ def get_connection():
     """Tao ket noi den CSDL Oracle bang che do Thin mode (khong can Instant Client)."""
     dsn = oracledb.makedsn(DB_HOST, DB_PORT, sid=DB_SID)
     return oracledb.connect(user=DB_USER, password=DB_PASS, dsn=dsn)
+
+
+def tham_so_kho():
+    """Đọc cùng một bộ lọc cho trang kho và hai API."""
+    raw = request.args.get("nguong", "5").strip()
+    if not re.fullmatch(r"[0-9]+", raw) or int(raw) < 1:
+        raise ValueError("Ngưỡng phải là số nguyên dương (từ 1 trở lên).")
+    return int(raw), request.args.get("maloai", "").strip()
+
+
+def du_lieu_kho(nguong, maloai):
+    """Lấy số liệu và danh sách từ cùng bộ lọc, chỉ SELECT hai bảng hiện có."""
+    dieu_kien = " WHERE sp.MALOAI = :maloai" if maloai else ""
+    tham_so = {"nguong": nguong}
+    if maloai:
+        tham_so["maloai"] = maloai
+
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(f"""
+                SELECT COUNT(*),
+                       COUNT(CASE WHEN sp.SOLUONGTON = 0 THEN 1 END),
+                       COUNT(CASE WHEN sp.SOLUONGTON BETWEEN 1 AND :nguong THEN 1 END)
+                FROM FASHION_ADMIN.SANPHAM sp{dieu_kien}
+            """, tham_so)
+            tong, het, sap = cur.fetchone()
+
+            cur.execute(f"""
+                SELECT sp.MASP, sp.TENSP, sp.KICHCO, sp.MAUSAC,
+                       sp.MALOAI, lsp.TENLOAI, sp.SOLUONGTON
+                FROM FASHION_ADMIN.SANPHAM sp
+                JOIN FASHION_ADMIN.LOAISANPHAM lsp ON lsp.MALOAI = sp.MALOAI
+                WHERE sp.SOLUONGTON BETWEEN 1 AND :nguong
+                {"AND sp.MALOAI = :maloai" if maloai else ""}
+                ORDER BY sp.SOLUONGTON, sp.MASP
+            """, tham_so)
+            danh_sach = [dict(zip(
+                ("masp", "tensp", "kichco", "mausac", "maloai", "tenloai", "soluongton"), row
+            )) for row in cur.fetchall()]
+
+            cur.execute("""
+                SELECT MALOAI, TENLOAI FROM FASHION_ADMIN.LOAISANPHAM ORDER BY MALOAI
+            """)
+            ds_loai = cur.fetchall()
+
+    return {"tong_sku": int(tong), "het_hang": int(het), "sap_het": int(sap)}, danh_sach, ds_loai
+
+
+@app.route("/kho")
+def tong_quan_kho():
+    try:
+        nguong, maloai = tham_so_kho()
+    except ValueError as e:
+        return render_template("kho.html", db_error=str(e), db_info=None,
+                               nguong=request.args.get("nguong", ""), maloai=request.args.get("maloai", ""),
+                               so_lieu={"tong_sku": 0, "het_hang": 0, "sap_het": 0},
+                               ds_sap_het=[], ds_loai=[]), 400
+    try:
+        so_lieu, ds_sap_het, ds_loai = du_lieu_kho(nguong, maloai)
+        db_error = None
+    except oracledb.Error as e:
+        so_lieu, ds_sap_het, ds_loai = {"tong_sku": 0, "het_hang": 0, "sap_het": 0}, [], []
+        db_error = f"Không thể đọc dữ liệu Oracle: {e}"
+    return render_template("kho.html", so_lieu=so_lieu, ds_sap_het=ds_sap_het,
+                           ds_loai=ds_loai, nguong=nguong, maloai=maloai,
+                           db_error=db_error, db_info=f"{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_SID}"), (503 if db_error else 200)
+
+
+def api_du_lieu_kho():
+    try:
+        nguong, maloai = tham_so_kho()
+        return du_lieu_kho(nguong, maloai), None
+    except ValueError as e:
+        return None, (jsonify({"loi": str(e)}), 400)
+    except oracledb.Error as e:
+        return None, (jsonify({"loi": f"Không thể đọc dữ liệu Oracle: {e}"}), 503)
+
+
+@app.route("/api/kho/tong-quan")
+def api_kho_tong_quan():
+    data, error = api_du_lieu_kho()
+    return error if error else jsonify(data[0])
+
+
+@app.route("/api/kho/sap-het")
+def api_kho_sap_het():
+    data, error = api_du_lieu_kho()
+    return error if error else jsonify(data[1])
 
 
 def giai_thich_loi_oracle(err):
@@ -385,6 +474,10 @@ def xoa_san_pham(masp):
             conn.close()
 
     return redirect(url_for("danh_sach_san_pham"))
+
+
+from workflows import create_blueprint
+app.register_blueprint(create_blueprint(get_connection, lambda: f"{DB_USER}@{DB_HOST}:{DB_PORT}/{DB_SID}"))
 
 
 if __name__ == "__main__":

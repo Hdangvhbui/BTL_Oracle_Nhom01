@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set sale = kind == 'sale' %}
+{% block title %}Chi tiết {{ 'hóa đơn' if sale else 'phiếu nhập' }} · Fashion Store{% endblock %}
+{% block heading %}{{ 'Hóa đơn' if sale else 'Phiếu nhập' }} {{ document.header.mahd if sale else document.header.mapn }}{% endblock %}
+{% block content %}
+{% if document %}
+<p class="page-intro">Chứng từ đã lập; đơn giá và số lượng là dữ liệu được lưu tại thời điểm giao dịch.</p>
+<section class="stats-grid" aria-label="Thông tin chứng từ">
+    <div class="stat-card glass"><span class="stat-label">Ngày {{ 'lập' if sale else 'nhập' }}</span><strong class="stat-value stat-text">{{ (document.header.ngaylap if sale else document.header.ngaynhap).strftime('%d/%m/%Y') }}</strong></div>
+    <div class="stat-card glass"><span class="stat-label">{{ 'Khách hàng' if sale else 'Nhà cung cấp' }}</span><strong class="stat-value stat-text">{{ document.header.khachhang if sale else document.header.nhacungcap }}</strong></div>
+    <div class="stat-card glass"><span class="stat-label">Tổng tiền</span><strong class="stat-value stat-text">{{ '{:,.0f}'.format(document.header.tongtien) }} đ</strong></div>
+</section>
+<section class="card"><h2>Chi tiết · Nhân viên {{ document.header.nhanvien }} ({{ document.header.manv }})</h2>
+<div class="table-scroll"><table><thead><tr><th>SKU</th><th>Sản phẩm</th><th class="num">Số lượng</th><th class="num">Đơn giá</th><th class="num">Thành tiền</th></tr></thead><tbody>
+{% for line in document.lines %}<tr><td><strong>{{ line.masp }}</strong></td><td>{{ line.tensp }}</td><td class="num">{{ line.soluong }}</td><td class="num">{{ '{:,.0f}'.format(line.dongia) }} đ</td><td class="num">{{ '{:,.0f}'.format(line.thanhtien) }} đ</td></tr>{% endfor %}
+</tbody></table></div><div class="btn-group"><a class="btn btn-secondary" href="{{ url_for('workflows.hoa_don' if sale else 'workflows.phieu_nhap') }}">Về danh sách</a></div></section>
+{% endif %}
+{% endblock %}

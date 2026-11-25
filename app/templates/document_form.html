@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% set sale = kind == 'sale' %}
+{% block title %}Lập {{ 'hóa đơn' if sale else 'phiếu nhập' }} · Fashion Store{% endblock %}
+{% block heading %}Lập {{ 'hóa đơn bán hàng' if sale else 'phiếu nhập hàng' }}{% endblock %}
+{% block content %}
+<p class="page-intro">Nhập nhiều SKU trong một chứng từ. Mỗi SKU chỉ được xuất hiện một lần.</p>
+<form method="POST" action="{{ url_for('workflows.lap_hoa_don' if sale else 'workflows.lap_phieu_nhap') }}">
+<section class="card"><h2>Thông tin chung</h2><div class="form-grid">
+    <div><label for="code">Mã {{ 'hóa đơn' if sale else 'phiếu nhập' }} *</label><input id="code" name="{{ 'mahd' if sale else 'mapn' }}" maxlength="20" required placeholder="VD: {{ 'HD' if sale else 'PN' }}TEST01"></div>
+    <div><label for="employee">Nhân viên *</label><select id="employee" name="manv" required><option value="">Chọn nhân viên</option>{% for e in employees %}<option value="{{ e[0] }}">{{ e[0] }} · {{ e[1] }}</option>{% endfor %}</select></div>
+    {% if sale %}<div><label for="customer">Khách hàng</label><select id="customer" name="makh"><option value="">Khách lẻ</option>{% for c in customers %}<option value="{{ c[0] }}">{{ c[0] }} · {{ c[1] }}</option>{% endfor %}</select></div>
+    {% else %}<div><label for="supplier">Nhà cung cấp *</label><select id="supplier" name="mancc" required><option value="">Chọn nhà cung cấp</option>{% for s in suppliers %}<option value="{{ s[0] }}">{{ s[0] }} · {{ s[1] }}</option>{% endfor %}</select></div>{% endif %}
+</div></section>
+<section class="card"><div class="section-head"><h2>Danh sách SKU</h2><button type="button" class="btn btn-secondary" id="add-line">+ Thêm dòng</button></div>
+<div id="lines" class="line-list"><div class="line-row"><div><label>SKU *</label><select name="masp" required><option value="">Chọn SKU</option>{% for p in products %}<option value="{{ p[0] }}">{{ p[0] }} · {{ p[1] }} · Tồn {{ p[2] }}{% if sale %} · {{ '{:,.0f}'.format(p[3]) }} đ{% endif %}</option>{% endfor %}</select></div><div><label>Số lượng *</label><input type="number" name="soluong" min="1" max="9999999999" step="1" required></div>{% if not sale %}<div><label>Giá nhập (đ) *</label><input type="number" name="gianhap" min="1" max="999999999999999" step="1" required></div>{% endif %}<button type="button" class="btn btn-danger remove-line" aria-label="Xóa dòng">Xóa</button></div></div>
+<div class="btn-group"><button type="submit" class="btn btn-primary">Lập chứng từ</button><a href="{{ url_for('workflows.hoa_don' if sale else 'workflows.phieu_nhap') }}" class="btn btn-secondary">Hủy</a></div></section>
+</form>
+<script>
+const lines = document.getElementById('lines');
+document.getElementById('add-line').addEventListener('click', () => {
+    const row = lines.firstElementChild.cloneNode(true);
+    row.querySelectorAll('input, select').forEach(field => field.value = '');
+    lines.appendChild(row);
+});
+lines.addEventListener('click', event => {
+    if (event.target.classList.contains('remove-line') && lines.children.length > 1) event.target.closest('.line-row').remove();
+});
+</script>
+{% endblock %}

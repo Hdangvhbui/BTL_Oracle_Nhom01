@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% set customer = kind == 'customer' %}
+{% block title %}{{ 'Khách hàng' if customer else 'Nhà cung cấp' }} · Fashion Store{% endblock %}
+{% block heading %}{{ 'Khách hàng' if customer else 'Nhà cung cấp' }}{% endblock %}
+{% block content %}
+<p class="page-intro">Danh mục dùng khi lập chứng từ.</p>
+<section class="card"><h2>Tìm theo tên hoặc mã</h2><form method="GET" class="filter-bar"><div class="filter-field"><label for="q">Tìm kiếm</label><input id="q" name="q" value="{{ query }}" placeholder="Nhập mã hoặc tên"></div><button class="btn btn-primary" type="submit">Tìm</button><a class="btn btn-secondary" href="{{ url_for('workflows.khach_hang' if customer else 'workflows.nha_cung_cap') }}">Đặt lại</a></form></section>
+<section class="card"><h2>Danh sách ({{ items|length }})</h2>{% if items %}<div class="table-scroll"><table><thead><tr><th>Mã</th><th>Tên</th><th>Điện thoại</th><th>Địa chỉ</th>{% if not customer %}<th>Email</th>{% endif %}</tr></thead><tbody>
+{% for item in items %}<tr><td><strong>{{ item[0] }}</strong></td><td>{{ item[1] }}</td><td>{{ item[2] if customer else item[2] }}</td><td>{{ item[3] or '—' }}</td>{% if not customer %}<td>{{ item[4] or '—' }}</td>{% endif %}</tr>{% endfor %}
+</tbody></table></div>{% else %}<div class="empty-state">Không có kết quả phù hợp.</div>{% endif %}</section>
+{% endblock %}
